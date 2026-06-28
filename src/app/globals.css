@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-body;
+  }
+
+  h1, h2, h3 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Reusable gradient background */
+  .bg-warm-gradient {
+    background: linear-gradient(135deg, #fdf4f4 0%, #faf7f5 50%, #fdfbf5 100%);
+  }
+
+  /* Subtle card shadow */
+  .card-shadow {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  /* Page container max-width */
+  .page-container {
+    @apply max-w-4xl mx-auto px-4 py-8;
+  }
+}
