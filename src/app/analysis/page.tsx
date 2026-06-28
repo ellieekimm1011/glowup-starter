@@ -3,9 +3,8 @@
 // Shows the full facial analysis results:
 // - Detected face shape
 // - Personalized makeup guide (blush, contour, highlight)
-// - Recommended tutorials
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Camera } from "lucide-react";
@@ -13,13 +12,12 @@ import Navbar from "@/components/layout/Navbar";
 import FaceShapeCard from "@/components/makeup/FaceShapeCard";
 import FaceOverlay from "@/components/makeup/FaceOverlay";
 import MakeupGuideSection from "@/components/makeup/MakeupGuideSection";
-import TutorialCard from "@/components/makeup/TutorialCard";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase, getSelfieUrl } from "@/lib/supabase";
 import { buildOverlayZones } from "@/lib/makeupGuide";
 import type { StoredAnalysis } from "@/types";
 
-export default function AnalysisPage() {
+function AnalysisPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
@@ -134,21 +132,6 @@ export default function AnalysisPage() {
         {/* Makeup guide */}
         <MakeupGuideSection recommendations={analysisData.recommendations} />
 
-        {/* Tutorial recommendations */}
-        <div>
-          <h2 className="font-display text-2xl font-bold text-gray-900 mb-2">
-            Tutorials For You
-          </h2>
-          <p className="text-nude-600 mb-6">
-            These tutorials are picked specifically for your face shape and beginner level.
-          </p>
-          <div className="space-y-4">
-            {analysisData.tutorials.map((tutorial, i) => (
-              <TutorialCard key={i} tutorial={tutorial} index={i} />
-            ))}
-          </div>
-        </div>
-
         {/* New analysis CTA */}
         <div className="border-t border-nude-200 pt-8 text-center">
           <p className="text-nude-500 text-sm mb-4">Want to try with a different photo?</p>
@@ -162,5 +145,25 @@ export default function AnalysisPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AnalysisPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-warm-gradient">
+          <Navbar />
+          <div className="flex items-center justify-center h-[70vh]">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-blush-300 border-t-blush-600 rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-nude-500 text-sm">Loading your results…</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <AnalysisPageContent />
+    </Suspense>
   );
 }
