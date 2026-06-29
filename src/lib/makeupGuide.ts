@@ -154,10 +154,10 @@ const FACE_SHAPE_GUIDE: Record<FaceShape, FaceShapeGuide> = {
       beginnerTip: "Keep the nose untouched here — the chin and forehead circles are doing the balancing work for your shape.",
     },
     contour: {
-      zones: ["cheekboneShadow"],
-      where: "Sweep a single soft shadow following the natural contour of your face — one line running from the high point of your cheekbone down into your cheek.",
-      why: "A single line that follows the cheekbone's own curve softens its width naturally, without adding extra shape your face doesn't need.",
-      beginnerTip: "Follow the bone itself rather than drawing a separate shape — the goal is one continuous, natural-looking shadow.",
+      zones: ["cheekboneShadow", "hollowCheeks"],
+      where: "Sweep a single soft shadow following the natural contour of your face — one line running from the high point of your cheekbone down into your cheek. Then add a thinner contour in the hollow beneath your cheekbone, starting near your ear and fading out before your mouth.",
+      why: "The line along the cheekbone's own curve softens its width naturally, and the added hollow-cheek contour deepens that effect right where your face is widest, without adding extra shape it doesn't need.",
+      beginnerTip: "Follow the bone itself rather than drawing a separate shape, and keep the hollow contour thin and light — the goal is one continuous, natural-looking shadow, not two competing ones.",
     },
     blush: {
       zones: ["lowerCheeks"],
