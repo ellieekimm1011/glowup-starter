@@ -4,14 +4,121 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 
-// These values come from your .env.local file
-// The NEXT_PUBLIC_ prefix means they're safe to use in the browser
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const fallbackUrl = "https://your-project.supabase.co";
+const fallbackAnonKey = "your-anon-key";
 
-// Create a single Supabase client for the browser
-// This is exported and used anywhere in the app that needs Supabase
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+const configuredSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+const configuredSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+
+function isPlaceholderValue(value?: string) {
+  if (!value) return true;
+
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized.includes("your-project") ||
+    normalized.includes("your_anon") ||
+    normalized.includes("your-anon") ||
+    normalized.includes("your-key") ||
+    normalized.includes("your-api-key") ||
+    normalized.includes("placeholder") ||
+    normalized.includes("example")
+  );
+}
+
+const isSupabaseConfigured = Boolean(
+  configuredSupabaseUrl &&
+    configuredSupabaseAnonKey &&
+    !isPlaceholderValue(configuredSupabaseUrl) &&
+    !isPlaceholderValue(configuredSupabaseAnonKey) &&
+    configuredSupabaseUrl !== fallbackUrl &&
+    configuredSupabaseAnonKey !== fallbackAnonKey
+);
+
+function createMissingConfigError() {
+  return {
+    message:
+      "Supabase is not configured yet. Add the real NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY values from your Supabase project in Vercel or your local env.",
+  };
+}
+
+function createFallbackQueryBuilder() {
+  const missingConfigError = createMissingConfigError();
+
+  return {
+    eq() {
+      return this;
+    },
+    async order() {
+      return { data: [], error: missingConfigError };
+    },
+    async single() {
+      return { data: null, error: missingConfigError };
+    },
+  };
+}
+
+function createFallbackClient() {
+  const missingConfigError = createMissingConfigError();
+
+  return {
+    auth: {
+      async getUser() {
+        return { data: { user: null }, error: null };
+      },
+      async signInWithPassword() {
+        return { data: { user: null, session: null }, error: missingConfigError };
+      },
+      async signUp() {
+        return { data: { user: null, session: null }, error: missingConfigError };
+      },
+      async signOut() {
+        return { error: null };
+      },
+      onAuthStateChange() {
+        return {
+          data: {
+            subscription: {
+              unsubscribe: () => {},
+            },
+          },
+        };
+      },
+    },
+    storage: {
+      from() {
+        return {
+          async upload() {
+            return { data: null, error: missingConfigError };
+          },
+          async createSignedUrl() {
+            return { data: null, error: missingConfigError };
+          },
+        };
+      },
+    },
+    from() {
+      return {
+        insert() {
+          return {
+            select() {
+              return createFallbackQueryBuilder();
+            },
+          };
+        },
+        select() {
+          return createFallbackQueryBuilder();
+        },
+      };
+    },
+  };
+}
+
+// Create a single Supabase client for the browser.
+// If the project has not been configured with real keys yet, a safe fallback
+// client is used so the app shows a friendly message instead of crashing.
+export const supabase = isSupabaseConfigured
+  ? createBrowserClient(configuredSupabaseUrl!, configuredSupabaseAnonKey!)
+  : createFallbackClient();
 
 // Helper: upload a selfie to Supabase Storage
 // Returns the storage path (not a signed URL — signed URLs expire after an
