@@ -127,10 +127,10 @@ const FACE_SHAPE_GUIDE: Record<FaceShape, FaceShapeGuide> = {
       beginnerTip: "Keep it simple here — under-eye brightening is doing most of the work, with the jaw touch as the one extra step for your shape.",
     },
     contour: {
-      zones: ["temples", "hollowCheeks", "jawline"],
-      where: "Lightly contour your temples to slim the upper portion of your face. Keep any contour under your cheekbones very light, and sweep just a small amount under your chin to soften its point.",
-      why: "Contouring the temples narrows the forehead's apparent width, while a touch of contour under the chin softens its pointed tip — together balancing the upper and lower halves of your face.",
-      beginnerTip: "The temple contour is the most important step for your shape — don't skip it even if it feels unfamiliar. Keep the chin touch small and soft.",
+      zones: ["temples", "hollowCheeks", "underChinCurve"],
+      where: "Lightly contour your temples to slim the upper portion of your face. Keep any contour under your cheekbones very light. Instead of contouring along your jaw, add a soft curved line that hugs the underside of your chin, dipping just below its tip.",
+      why: "Contouring the temples narrows the forehead's apparent width, while the curve under the chin softens its pointed tip — together balancing the upper and lower halves of your face, without adding definition along the jaw itself, which would only draw more attention to its narrowness.",
+      beginnerTip: "The temple contour is the most important step for your shape — don't skip it even if it feels unfamiliar. Keep the under-chin curve soft and light so it reads as natural shadow, not a line.",
     },
     blush: {
       zones: ["centerCheeks"],
