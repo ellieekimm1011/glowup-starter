@@ -115,10 +115,10 @@ const FACE_SHAPE_GUIDE: Record<FaceShape, FaceShapeGuide> = {
   heart: {
     goal: "Balance a wider forehead and narrower chin.",
     highlight: {
-      zones: ["noseBridge", "noseTip", "cheekTops", "jawSides"],
-      where: "Highlight down the center of your nose and add a touch on top of each cheekbone. Skip your forehead entirely — it's already the widest part of your face. As an exception just for your shape, also brighten the sides of your jawline.",
-      why: "Heart faces already have a wide forehead, so keeping highlight off it avoids emphasizing the width further, while brightening the jaw sides visually adds width to the lower half of your face to balance it.",
-      beginnerTip: "Skip your usual forehead highlight routine here — your forehead doesn't need any extra emphasis. The jawline brightening is the one exception for your shape.",
+      zones: ["noseBridge", "noseTip", "cheekTops"],
+      where: "Highlight down the center of your nose and add a touch on top of each cheekbone. Skip your forehead entirely — it's already the widest part of your face.",
+      why: "Heart faces already have a wide forehead, so keeping highlight off it avoids emphasizing the width further.",
+      beginnerTip: "Skip your usual forehead highlight routine here — your forehead doesn't need any extra emphasis.",
     },
     concealer: {
       zones: ["underEyeTriangle"],
