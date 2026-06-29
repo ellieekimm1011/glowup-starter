@@ -121,10 +121,10 @@ const FACE_SHAPE_GUIDE: Record<FaceShape, FaceShapeGuide> = {
       beginnerTip: "Skip your usual forehead highlight routine here — your forehead doesn't need any extra emphasis. The jawline brightening is the one exception for your shape.",
     },
     concealer: {
-      zones: ["underEyeTriangle", "jawSides"],
-      where: "Brighten under your eyes with standard placement, and add a touch of concealer to the sides of your jaw too. Skip your forehead entirely.",
-      why: "Brightening the jaw sides (alongside the matching highlight there) reinforces the lower-face width that balances a heart shape — forehead brightening would only add more emphasis to a part that's already wide.",
-      beginnerTip: "Keep it simple here — under-eye brightening is doing most of the work, with the jaw touch as the one extra step for your shape.",
+      zones: ["underEyeTriangle"],
+      where: "Brighten under your eyes with standard placement. Skip your forehead entirely.",
+      why: "Heart faces already have a wide forehead, so keeping concealer off it avoids extra emphasis there. The jaw-side highlight (not concealer) is what reinforces lower-face width for this shape.",
+      beginnerTip: "Keep it simple here — under-eye brightening is doing the work for your shape.",
     },
     contour: {
       zones: ["temples", "hollowCheeks", "underChinCurve"],
