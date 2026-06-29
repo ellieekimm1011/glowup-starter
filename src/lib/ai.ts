@@ -8,12 +8,14 @@
 import type { FaceAnalysis, FaceShape } from "@/types";
 import { buildOverlayZones, buildRecommendations } from "@/lib/makeupGuide";
 
-// What we actually need the AI to determine from the photo — placement
-// itself is looked up deterministically afterward (see lib/makeupGuide.ts),
-// since that needs to be 100% consistent and free models are not reliable
-// enough to be trusted with it.
+// What we actually need the AI to determine from the photo. Placement is
+// looked up deterministically afterward (see lib/makeupGuide.ts), and face
+// shape itself is measured from landmarks (see lib/faceShapeClassifier.ts)
+// rather than guessed — free vision models aren't reliable enough to trust
+// for either. `faceShape` is only present when landmark measurement wasn't
+// available (e.g. no face detected client-side) and the AI has to guess.
 interface AIShapeAnalysis {
-  faceShape: FaceShape;
+  faceShape?: FaceShape;
   faceShapeDescription: string;
   tutorials: FaceAnalysis["tutorials"];
 }
@@ -27,9 +29,50 @@ const MODELS = [
   "google/gemma-4-31b-it:free",
 ];
 
-// The main function: takes an image (as base64) and returns full analysis
-export async function analyzeFace(imageBase64: string, mimeType: string): Promise<FaceAnalysis> {
-  const prompt = `You are an expert makeup artist and beauty coach with 15+ years of experience.
+// The main function: takes an image (as base64) and returns full analysis.
+// `knownFaceShape` comes from client-side landmark measurement
+// (lib/faceShapeClassifier.ts) — when present, the AI is told the shape
+// rather than asked to determine it, and is only used for descriptive copy
+// and tutorial picks. It's omitted only when landmark detection failed
+// (e.g. no face found in the photo), in which case the AI falls back to
+// guessing the shape itself.
+export async function analyzeFace(
+  imageBase64: string,
+  mimeType: string,
+  knownFaceShape?: FaceShape
+): Promise<FaceAnalysis> {
+  const prompt = knownFaceShape
+    ? `You are an expert makeup artist and beauty coach with 15+ years of experience.
+This person's face shape has been precisely measured from facial landmarks: it is "${knownFaceShape}". Look at this facial photo and write a warm, specific description of their face shape, plus tutorial recommendations for it.
+
+Respond with ONLY a valid JSON object (no markdown, no explanation outside the JSON) in this exact format:
+
+{
+  "faceShapeDescription": "2-3 sentences describing this person's ${knownFaceShape} face shape and its key characteristics",
+  "tutorials": [
+    {
+      "title": "Specific tutorial title appropriate for this face shape",
+      "creator": "YouTube creator name known for makeup tutorials",
+      "whyItFits": "Why this specific tutorial is perfect for this face shape and beginner level",
+      "summary": "2-3 sentence description of what the tutorial covers and what the viewer will learn"
+    },
+    {
+      "title": "Second tutorial title",
+      "creator": "Creator name",
+      "whyItFits": "Why it fits",
+      "summary": "Summary"
+    },
+    {
+      "title": "Third tutorial title",
+      "creator": "Creator name",
+      "whyItFits": "Why it fits",
+      "summary": "Summary"
+    }
+  ]
+}
+
+Be warm, encouraging, and specific. Use beginner-friendly language.`
+    : `You are an expert makeup artist and beauty coach with 15+ years of experience.
 Analyze this facial photo carefully and identify this person's face shape.
 
 Respond with ONLY a valid JSON object (no markdown, no explanation outside the JSON) in this exact format:
@@ -110,13 +153,16 @@ Be warm, encouraging, and specific. Use beginner-friendly language.`;
 
     try {
       const shapes = JSON.parse(cleaned) as AIShapeAnalysis;
+      const faceShape = knownFaceShape ?? shapes.faceShape;
+      if (!faceShape) throw new Error("No face shape in AI response");
+
       console.log(`[analyzeFace] ${model} succeeded`);
       return {
-        faceShape: shapes.faceShape,
+        faceShape,
         faceShapeDescription: shapes.faceShapeDescription,
         tutorials: shapes.tutorials,
-        recommendations: buildRecommendations(shapes.faceShape),
-        overlayZones: buildOverlayZones(shapes.faceShape),
+        recommendations: buildRecommendations(faceShape),
+        overlayZones: buildOverlayZones(faceShape),
       };
     } catch {
       lastError = "AI returned invalid JSON. Please try again.";

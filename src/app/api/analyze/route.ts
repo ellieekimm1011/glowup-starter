@@ -5,11 +5,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeFace } from "@/lib/ai";
+import type { FaceShape } from "@/types";
+
+const FACE_SHAPES: FaceShape[] = ["oval", "round", "square", "heart", "diamond", "oblong"];
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { imageBase64, mimeType } = body;
+    const { imageBase64, mimeType, faceShape } = body;
 
     // Validate inputs
     if (!imageBase64 || !mimeType) {
@@ -28,8 +31,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // faceShape, when provided, comes from client-side landmark measurement
+    // (lib/faceShapeClassifier.ts) rather than the AI guessing it — only
+    // trust it if it's actually one of the known shapes.
+    const knownFaceShape: FaceShape | undefined = FACE_SHAPES.includes(faceShape)
+      ? faceShape
+      : undefined;
+
     // Call the AI model to analyze the face
-    const analysis = await analyzeFace(imageBase64, mimeType);
+    const analysis = await analyzeFace(imageBase64, mimeType, knownFaceShape);
 
     // Return the analysis to the browser
     return NextResponse.json({ analysis });

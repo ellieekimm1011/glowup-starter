@@ -10,6 +10,23 @@ import Navbar from "@/components/layout/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { uploadSelfie, saveAnalysis } from "@/lib/supabase";
 import { fileToBase64 } from "@/lib/utils";
+import { detectFaceLandmarks, loadImageFromFile } from "@/lib/faceLandmarks";
+import { classifyFaceShape } from "@/lib/faceShapeClassifier";
+
+// Measures face shape from landmarks instead of letting the AI guess it —
+// returns null (rather than throwing) if no face could be detected, so the
+// caller can fall back to the AI's own guess instead of blocking upload.
+async function measureFaceShape(file: File) {
+  try {
+    const img = await loadImageFromFile(file);
+    const landmarks = await detectFaceLandmarks(img);
+    if (!landmarks) return null;
+    return classifyFaceShape(landmarks, img.naturalWidth, img.naturalHeight);
+  } catch (err) {
+    console.error("Face shape measurement failed:", err);
+    return null;
+  }
+}
 
 type UploadState = "idle" | "uploading" | "analyzing" | "done" | "error";
 
@@ -72,8 +89,10 @@ export default function UploadPage() {
       // Step 1: Upload image to Supabase Storage
       const imageUrl = await uploadSelfie(file, user.id);
 
-      // Step 2: Convert image to base64 for AI API
+      // Step 2: Measure face shape from landmarks, then convert image to
+      // base64 for the AI API
       setState("analyzing");
+      const faceShape = await measureFaceShape(file);
       const base64 = await fileToBase64(file);
 
       // Step 3: Call our API route to analyze with Claude
@@ -83,6 +102,7 @@ export default function UploadPage() {
         body: JSON.stringify({
           imageBase64: base64,
           mimeType: file.type,
+          faceShape,
         }),
       });
 

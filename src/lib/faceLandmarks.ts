@@ -40,6 +40,25 @@ export async function detectFaceLandmarks(
   return landmarks ?? null;
 }
 
+// Loads a File into an HTMLImageElement so it can be passed to
+// detectFaceLandmarks — needed when measuring face shape ahead of upload,
+// before any <img> for the photo exists in the DOM.
+export function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image"));
+    };
+    img.src = url;
+  });
+}
+
 // Key landmark indices used to position makeup zones.
 // Reference: MediaPipe Face Mesh 468-point topology.
 export const LANDMARKS = {
